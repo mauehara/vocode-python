@@ -15,6 +15,18 @@ from vocode.streaming.telephony.config_manager.redis_config_manager import (
 )
 from vocode.streaming.models.agent import ChatGPTAgentConfig
 import time
+from vocode.streaming.models.agent import ChatGPTAgentConfig
+from vocode.streaming.models.synthesizer import AzureSynthesizerConfig
+from vocode.streaming.models.message import BaseMessage
+from vocode.streaming.telephony.constants import (
+    DEFAULT_AUDIO_ENCODING,
+    DEFAULT_SAMPLING_RATE,
+    DEFAULT_CHUNK_SIZE,
+)
+from vocode.streaming.models.transcriber import (
+    AzureTranscriberConfig,
+    PunctuationEndpointingConfig,
+)
 
 LOOP = asyncio.new_event_loop()
 asyncio.set_event_loop(LOOP)
@@ -31,6 +43,21 @@ def call_phone_number(input: str) -> str:
     for example, `+15555555555|the assistant is explaining the meaning of life|i'm going to tell you the meaning of life` will call +15555555555, say 'i'm going to tell you the meaning of life', and instruct the assistant to tell the human what the meaning of life is.
     """
     phone_number, prompt, initial_message = input.split("|", 2)
+
+    synthesizer_config = AzureSynthesizerConfig(
+        sampling_rate=DEFAULT_SAMPLING_RATE,
+        audio_encoding=DEFAULT_AUDIO_ENCODING,
+        voice_name="pt-BR-FranciscaNeural",
+        language_code="pt-BR",
+    )
+    transcriber_config = AzureTranscriberConfig(
+        sampling_rate=DEFAULT_SAMPLING_RATE,
+        audio_encoding=DEFAULT_AUDIO_ENCODING,
+        chunk_size=DEFAULT_CHUNK_SIZE,
+        endpointing_config=PunctuationEndpointingConfig(),
+        language="pt-BR",
+    )
+
     call = OutboundCall(
         base_url=os.environ["TELEPHONY_SERVER_BASE_URL"],
         to_phone=phone_number,
@@ -41,6 +68,8 @@ def call_phone_number(input: str) -> str:
             initial_message=BaseMessage(text=initial_message),
         ),
         logger=logging.Logger("call_phone_number"),
+        synthesizer_config=synthesizer_config,
+        transcriber_config=transcriber_config,
     )
     LOOP.run_until_complete(call.start())
     while True:

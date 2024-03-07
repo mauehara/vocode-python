@@ -21,6 +21,9 @@ from vocode.streaming.models.transcriber import (
     AzureTranscriberConfig,
     PunctuationEndpointingConfig,
 )
+from vocode.streaming.models.telephony import (
+    TwilioConfig,
+)
 
 
 BASE_URL = os.environ["BASE_URL"]
@@ -30,6 +33,11 @@ BASE_URL = os.environ["BASE_URL"]
 async def main():
     config_manager = RedisConfigManager()
 
+    twilio_config = TwilioConfig(
+        account_sid=os.environ["TWILIO_ACCOUNT_SID"],
+        auth_token=os.environ["TWILIO_AUTH_TOKEN"],
+        record=True,
+    )
     synthesizer_config = AzureSynthesizerConfig(
         sampling_rate=DEFAULT_SAMPLING_RATE,
         audio_encoding=DEFAULT_AUDIO_ENCODING,
@@ -44,19 +52,21 @@ async def main():
         language="pt-BR",
     )
     agent_config = ChatGPTAgentConfig(
-        initial_message=BaseMessage(text="Oi tudo bem? Gostaria de agendar uma consulta para o Mauricio."),
-        prompt_preamble="Agende uma consulta médica para o Mauricio.",
+        initial_message=BaseMessage(text="Oi Lia, você vai ao show de qual artista hoje?"),
+        prompt_preamble="Descubra o gênero musical do cantor que a Lia irá assistir hoje.",
         generate_responses=True,
+        model_name="gpt-4",
     )
 
     outbound_call = OutboundCall(
         base_url=BASE_URL,
-        to_phone="+5511973567307",
+        to_phone="+5511946275451",
         from_phone=os.environ["OUTBOUND_CALLER_NUMBER"],
         config_manager=config_manager,
         agent_config=agent_config,
         synthesizer_config=synthesizer_config,
         transcriber_config=transcriber_config,
+        twilio_config=twilio_config,
     )
 
     input("Press enter to start call...")
