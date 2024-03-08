@@ -52,21 +52,31 @@ async def main():
         language="pt-BR",
     )
     agent_config = ChatGPTAgentConfig(
-        initial_message=BaseMessage(text="Oi Lia, você vai ao show de qual artista hoje?"),
-        prompt_preamble="Descubra o gênero musical do cantor que a Lia irá assistir hoje.",
+        initial_message=BaseMessage(text="Boa tarde! Vocês aceitam plano da Sul América?"),
+        prompt_preamble="Você é um assistente pessoal que faz atendimentos de consultas médicas. \
+            Seu trabalho é ajudar seu cliente a encontrar uma clínica de dermatoloogia na Vila Madalena \
+            e que aceite o plano de saúde: Executivo 100 da Sul América. \
+            você falará agora com uma clínica por telefone. \
+            Seu objetivo é confirmar se a clínica aceita o plano de saúde do cliente e perguntar qual o próximo horário disponível para consulta. \
+            Não marque nenhuma consulta, apenas pergunte sobre a disponibilidade. \
+            Diga que você precisa confirmar com o seu cliente primeiro e que retornará a ligação. \
+            Seja cordial e educada. Dirija-se a pessoa que te atender pelo nome. \
+            Se limite a cumprir o objetivo e não faça perguntas adicionais e nem responda a perguntas fora desse contexto.",
         generate_responses=True,
         model_name="gpt-4",
     )
 
     outbound_call = OutboundCall(
         base_url=BASE_URL,
-        to_phone="+5511946275451",
+        # to_phone="+551130219164",
+        to_phone="+5511973567307",
         from_phone=os.environ["OUTBOUND_CALLER_NUMBER"],
         config_manager=config_manager,
         agent_config=agent_config,
         synthesizer_config=synthesizer_config,
         transcriber_config=transcriber_config,
         twilio_config=twilio_config,
+        mobile_only=False,
     )
 
     input("Press enter to start call...")
