@@ -11,6 +11,8 @@ from vocode.streaming.telephony.config_manager.redis_config_manager import (
 
 from vocode.streaming.models.agent import ChatGPTAgentConfig
 from vocode.streaming.models.synthesizer import AzureSynthesizerConfig
+from vocode.streaming.models.synthesizer import ElevenLabsSynthesizerConfig
+from vocode.streaming.models.synthesizer import GoogleSynthesizerConfig
 from vocode.streaming.models.message import BaseMessage
 from vocode.streaming.telephony.constants import (
     DEFAULT_AUDIO_ENCODING,
@@ -41,8 +43,24 @@ async def main():
     synthesizer_config = AzureSynthesizerConfig(
         sampling_rate=DEFAULT_SAMPLING_RATE,
         audio_encoding=DEFAULT_AUDIO_ENCODING,
-        voice_name="pt-BR-FranciscaNeural",
+        # voice_name="pt-BR-FranciscaNeural",
+        voice_name="pt-BR-AntonioNeural",
         language_code="pt-BR",
+    )
+    elevenlabs_synthesizer_config = ElevenLabsSynthesizerConfig(
+        sampling_rate=DEFAULT_SAMPLING_RATE,
+        audio_encoding=DEFAULT_AUDIO_ENCODING,
+        api_key="b19ec31664be9f7e15f2a83e2c4d7c8f",
+        voice_id="CZD4BJ803C6T0alQxsR7",
+    )
+    google_synthesizer_config = ElevenLabsSynthesizerConfig(
+        sampling_rate=DEFAULT_SAMPLING_RATE,
+        audio_encoding=DEFAULT_AUDIO_ENCODING,
+        api_key="AIzaSyDaMFTgcp8MLaQ_tjnDhfLD9hpGf-zwABY",
+        language_code="pt-BR",
+        voice_name="pt-BR-Neural2-B",
+        pitch=0,
+        speaking_rate=1.2,
     )
     transcriber_config = AzureTranscriberConfig(
         sampling_rate=DEFAULT_SAMPLING_RATE,
@@ -53,8 +71,8 @@ async def main():
     )
     agent_config = ChatGPTAgentConfig(
         initial_message=BaseMessage(text="Boa tarde! Vocês aceitam plano da Sul América?"),
-        prompt_preamble="Você é um assistente pessoal que faz atendimentos de consultas médicas. \
-            Seu trabalho é ajudar seu cliente a encontrar uma clínica de dermatoloogia na Vila Madalena \
+        prompt_preamble="Você é um assistente pessoal que faz agendamentos de consultas médicas. \
+            Seu trabalho é ajudar seu cliente a encontrar uma clínica médica \
             e que aceite o plano de saúde: Executivo 100 da Sul América. \
             você falará agora com uma clínica por telefone. \
             Seu objetivo é confirmar se a clínica aceita o plano de saúde do cliente e perguntar qual o próximo horário disponível para consulta. \
@@ -68,8 +86,8 @@ async def main():
 
     outbound_call = OutboundCall(
         base_url=BASE_URL,
-        # to_phone="+551130219164",
-        to_phone="+5511973567307",
+        to_phone="+5511996309356",
+        # to_phone="+5511973567307",
         from_phone=os.environ["OUTBOUND_CALLER_NUMBER"],
         config_manager=config_manager,
         agent_config=agent_config,
