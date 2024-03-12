@@ -11,9 +11,6 @@ from vocode.streaming.telephony.config_manager.redis_config_manager import (
 
 from vocode.streaming.models.agent import ChatGPTAgentConfig
 from vocode.streaming.models.synthesizer import AzureSynthesizerConfig
-from vocode.streaming.models.synthesizer import ElevenLabsSynthesizerConfig
-from vocode.streaming.models.synthesizer import GoogleSynthesizerConfig
-from vocode.streaming.models.message import BaseMessage
 from vocode.streaming.telephony.constants import (
     DEFAULT_AUDIO_ENCODING,
     DEFAULT_SAMPLING_RATE,
@@ -46,21 +43,6 @@ async def main():
         voice_name="pt-BR-FranciscaNeural",
         # voice_name="pt-BR-AntonioNeural",
         language_code="pt-BR",
-    )
-    elevenlabs_synthesizer_config = ElevenLabsSynthesizerConfig(
-        sampling_rate=DEFAULT_SAMPLING_RATE,
-        audio_encoding=DEFAULT_AUDIO_ENCODING,
-        api_key="b19ec31664be9f7e15f2a83e2c4d7c8f",
-        voice_id="CZD4BJ803C6T0alQxsR7",
-    )
-    google_synthesizer_config = ElevenLabsSynthesizerConfig(
-        sampling_rate=DEFAULT_SAMPLING_RATE,
-        audio_encoding=DEFAULT_AUDIO_ENCODING,
-        api_key="AIzaSyDaMFTgcp8MLaQ_tjnDhfLD9hpGf-zwABY",
-        language_code="pt-BR",
-        voice_name="pt-BR-Neural2-B",
-        pitch=0,
-        speaking_rate=1.2,
     )
     transcriber_config = AzureTranscriberConfig(
         sampling_rate=DEFAULT_SAMPLING_RATE,
