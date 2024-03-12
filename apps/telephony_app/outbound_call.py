@@ -43,8 +43,8 @@ async def main():
     synthesizer_config = AzureSynthesizerConfig(
         sampling_rate=DEFAULT_SAMPLING_RATE,
         audio_encoding=DEFAULT_AUDIO_ENCODING,
-        # voice_name="pt-BR-FranciscaNeural",
-        voice_name="pt-BR-AntonioNeural",
+        voice_name="pt-BR-FranciscaNeural",
+        # voice_name="pt-BR-AntonioNeural",
         language_code="pt-BR",
     )
     elevenlabs_synthesizer_config = ElevenLabsSynthesizerConfig(
@@ -70,8 +70,9 @@ async def main():
         language="pt-BR",
     )
     agent_config = ChatGPTAgentConfig(
-        initial_message=BaseMessage(text="Boa tarde! Vocês aceitam plano da Sul América?"),
-        prompt_preamble="Você é um assistente pessoal que faz agendamentos de consultas médicas. \
+        # initial_message=BaseMessage(text="Boa tarde! Vocês aceitam plano da Sul América?"),
+        prompt_preamble="Você é um assistente pessoal do Mauricio que faz agendamentos de consultas médicas. \
+            se apresente como tal, não precisa falar seu nome. \
             Seu trabalho é ajudar seu cliente a encontrar uma clínica médica \
             e que aceite o plano de saúde: Executivo 100 da Sul América. \
             você falará agora com uma clínica por telefone. \
@@ -79,14 +80,15 @@ async def main():
             Não marque nenhuma consulta, apenas pergunte sobre a disponibilidade. \
             Diga que você precisa confirmar com o seu cliente primeiro e que retornará a ligação. \
             Seja cordial e educada. Dirija-se a pessoa que te atender pelo nome. \
-            Se limite a cumprir o objetivo e não faça perguntas adicionais e nem responda a perguntas fora desse contexto.",
+            Se limite a cumprir o objetivo e não faça perguntas adicionais e nem responda a perguntas fora desse contexto. \
+            Espere que seu interlocutor fale para iniciar sua fala.",
         generate_responses=True,
         model_name="gpt-4",
     )
 
     outbound_call = OutboundCall(
         base_url=BASE_URL,
-        to_phone="+5511996309356",
+        to_phone="+551130850540",
         # to_phone="+5511973567307",
         from_phone=os.environ["OUTBOUND_CALLER_NUMBER"],
         config_manager=config_manager,
