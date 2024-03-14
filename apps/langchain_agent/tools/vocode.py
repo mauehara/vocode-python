@@ -27,6 +27,9 @@ from vocode.streaming.models.transcriber import (
     AzureTranscriberConfig,
     PunctuationEndpointingConfig,
 )
+from vocode.streaming.models.telephony import (
+    TwilioConfig,
+)
 
 LOOP = asyncio.new_event_loop()
 asyncio.set_event_loop(LOOP)
@@ -44,6 +47,25 @@ def call_phone_number(input: str) -> str:
     """
     phone_number, prompt, initial_message = input.split("|", 2)
 
+    prompt_preamble = """
+        O assistente é o assistente pessoal do Sr.Mauricio.
+        O trabalho do assistente é ajudar o Sr.Mauricio a agendar consultas médicas.
+        O assistente precisa confirmar se a consultório médico aceita o plano de saúde Executivo 100 da Sul América.
+        O assistente também precisa confirmar qual o próximo horário disponível para consulta.
+        O assistente é cordial e direto. 
+        O assistente fala em português do Brasil.
+        O assistente usa frases curtas e pede uma informação por vez.
+        O assistente usa frases curtas e pede uma informação por vez não responde a nenhuma pergunta que fuja de seu contexto.
+        O assistente não agenda nenhuma consulta, apenas pergunta sobre a disponibilidade.
+        O assistente não inventa dados e informações.
+        O assistente interaje apenas com os consultório médicos.
+        O assistente não se coloca à disposição ao final da ligação. Apenas deseja um ótimo dia e desliga.
+        O assistente espera a consultório médico atender e responder a ligação antes de começar a falar.
+        O assistente se refere à pessoa que atende pelo nome.
+        Caso o assistente precise de mais informações, ele pede para a pessoa aguardar e retorna a ligação.
+        Após a fala inicial da pessoa que atender a ligação, o assistente deve se apresentar e perguntar se pode tirar uma dúvida antes de prosseguir.
+        """ + prompt
+
     synthesizer_config = AzureSynthesizerConfig(
         sampling_rate=DEFAULT_SAMPLING_RATE,
         audio_encoding=DEFAULT_AUDIO_ENCODING,
@@ -57,6 +79,11 @@ def call_phone_number(input: str) -> str:
         endpointing_config=PunctuationEndpointingConfig(),
         language="pt-BR",
     )
+    twilio_config = TwilioConfig(
+        account_sid=os.environ["TWILIO_ACCOUNT_SID"],
+        auth_token=os.environ["TWILIO_AUTH_TOKEN"],
+        record=True,
+    )
 
     call = OutboundCall(
         base_url=os.environ["TELEPHONY_SERVER_BASE_URL"],
@@ -64,12 +91,15 @@ def call_phone_number(input: str) -> str:
         from_phone=os.environ["OUTBOUND_CALLER_NUMBER"],
         config_manager=RedisConfigManager(),
         agent_config=ChatGPTAgentConfig(
-            prompt_preamble=prompt,
-            initial_message=BaseMessage(text=initial_message),
+            prompt_preamble=prompt_preamble,
+            # initial_message=BaseMessage(text=initial_message),
+            temperature=0.1,
         ),
         logger=logging.Logger("call_phone_number"),
         synthesizer_config=synthesizer_config,
         transcriber_config=transcriber_config,
+        twilio_config=twilio_config,
+        mobile_only=False,
     )
     LOOP.run_until_complete(call.start())
     while True:
