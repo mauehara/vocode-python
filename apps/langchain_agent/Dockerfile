@@ -1,4 +1,4 @@
-FROM python:3.9-bullseye
+FROM python:3.11-bullseye
 
 # get portaudio and ffmpeg
 RUN apt-get update \
@@ -11,7 +11,8 @@ WORKDIR /code
 COPY ./pyproject.toml /code/pyproject.toml
 COPY ./poetry.lock /code/poetry.lock
 RUN pip install --no-cache-dir --upgrade poetry
-RUN poetry config virtualenvs.create false
+# RUN poetry config virtualenvs.create false
+RUN poetry env use 3.11
 RUN poetry install --no-dev --no-interaction --no-ansi
 COPY call_transcript_utils.py /code/call_transcript_utils.py
 COPY telephony_app.py /code/telephony_app.py

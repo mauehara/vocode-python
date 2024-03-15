@@ -22,18 +22,15 @@ if __name__ == "__main__":
     # Redirect stdout to our custom class
     sys.stdout = typing.cast(typing.TextIO, RedactPhoneNumbers(sys.stdout))
 
-    OBJECTIVE = (
-        input("Objective: ")
-        or "Ligue para as clínicas em meus contatos e pergunte qual o próximo horário disponível para consulta."
-    )
+    OBJECTIVE = "Ligue para as clínicas em meus contatos e pergunte qual o próximo horário disponível para consulta."
     llm = ChatOpenAI(
         temperature=0, 
         model_name="gpt-4")
     system_message = """
         Você é o assistente pessoal do Sr.Mauricio.
-        Seu trabalho é ajudar o Sr.Mauricio a agendar consultas médicas.
+        Seu trabalho é ajudar o Sr.Mauricio a agendar uma consulta com dermatologista.
         Você falará agora com uma clínica por telefone.
-        Você precisa confirmar se a clínica aceita o plano de saúde Executivo 100 da Sul América.
+        Você precisa confirmar se a clínica aceita o plano de saúde da Bradesco.
         Você também precisa confirmar qual o próximo horário disponível para consulta.
         Seja cordial e direta. Fale em português do Brasil.
         Prefira frases curtas e peça uma informação por vez.
@@ -41,6 +38,8 @@ if __name__ == "__main__":
         Não agende nenhuma consulta, apenas pergunte sobre a disponibilidade.
         Não invente dados e informações.
         Espere a clínica atender e responder a ligação antes de começar a falar.
+        Caso seja interrompida, o assistente espera a clínica terminar de falar e continue de onde parou.
+        Durante a conversa, podem haver mal-entendidos como a clínica testando a conexão ao dizer "alô", nesses casos o assistente apenas ignora e continua de onde parou.
         Sua primeira fala deve se apresentar antes de tudo e perguntar se pode tirar uma dúvida com a pessoa que atender.
         """
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
