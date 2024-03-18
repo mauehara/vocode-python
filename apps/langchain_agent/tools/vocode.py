@@ -15,8 +15,6 @@ from vocode.streaming.telephony.config_manager.redis_config_manager import (
 )
 from vocode.streaming.models.agent import ChatGPTAgentConfig
 import time
-from vocode.streaming.models.agent import ChatGPTAgentConfig
-from vocode.streaming.models.synthesizer import AzureSynthesizerConfig
 from vocode.streaming.models.synthesizer import ElevenLabsSynthesizerConfig
 from vocode.streaming.telephony.constants import (
     DEFAULT_AUDIO_ENCODING,
@@ -26,6 +24,7 @@ from vocode.streaming.telephony.constants import (
 from vocode.streaming.models.transcriber import (
     AzureTranscriberConfig,
     PunctuationEndpointingConfig,
+    DeepgramTranscriberConfig,
 )
 from vocode.streaming.models.telephony import (
     TwilioConfig,
@@ -48,31 +47,22 @@ def call_phone_number(input: str) -> str:
     phone_number, prompt, initial_message = input.split("|", 2)
 
     prompt_preamble = """
-        O assistente é o assistente pessoal de um cliente chamado Mauricio.
-        O objetivo do assistente é ajudar o Mauricio a agendar consultas médicas.
-        O assistente precisa confirmar se a consultório médico aceita o plano de saúde da Bradesco.
-        O assistente também precisa confirmar qual o próximo horário disponível para consulta.
-        O assistente é cordial e direto. 
-        O assistente fala em português do Brasil.
-        O assistente usa frases curtas e pede uma informação por vez.
-        O assistente não responde a nenhuma pergunta que fuja de seu contexto.
-        O assistente não agenda nenhuma consulta, apenas pergunta sobre a disponibilidade.
-        O assistente não inventa dados e informações.
-        O assistente interaje apenas com os consultório médicos.
-        O assistente não se coloca à disposição ao final da ligação. Apenas deseja um ótimo dia e desliga.
+       O assistente está ligando para um dermatologista com os objetivos:
+        - Certificar-se de que o consultório aceita o plano de saúde da Bradesco: TNP4.
+        - Perguntar pela próxima data e hora disponíveis para uma consulta.
+        O assistente está sendo cordial, informal e sucinto.
         O assistente espera a consultório médico atender e responder a ligação antes de começar a falar.
-        O assistente se refere à pessoa que atende pelo nome.
-        O assistente não precisa dizer o seu próprio nome ao se apresentar.
-        Caso o assistente precise de mais informações, ele diz que irá retornar a ligação.
-        Após a fala inicial da pessoa que atender a ligação, o assistente pergunta sobre o plano de saúde.
-        """ + prompt
+        O assistente não cria ou cita nomes de médicos ou o seu próprio.
+        O assistente não está agendando uma consulta, apenas perguntando sobre a disponibilidade.
+        O assistente usa frases curtas com até 15 palavras e pede uma informação por vez.
+    """
 
-    synthesizer_config = AzureSynthesizerConfig(
-        sampling_rate=DEFAULT_SAMPLING_RATE,
-        audio_encoding=DEFAULT_AUDIO_ENCODING,
-        voice_name="pt-BR-FranciscaNeural",
-        language_code="pt-BR",
-    )
+    # synthesizer_config = AzureSynthesizerConfig(
+    #     sampling_rate=DEFAULT_SAMPLING_RATE,
+    #     audio_encoding=DEFAULT_AUDIO_ENCODING,
+    #     voice_name="pt-BR-FranciscaNeural",
+    #     language_code="pt-BR",
+    # )
     elevenlabs_synthesizer_config = ElevenLabsSynthesizerConfig(
         api_key=os.environ["ELEVENLABS_API_KEY"],
         voice_id=os.environ["ELEVENLABS_VOICE_ID"],
@@ -84,13 +74,18 @@ def call_phone_number(input: str) -> str:
         optimize_streaming_latency=3,
     )
 
-    transcriber_config = AzureTranscriberConfig(
-        sampling_rate=DEFAULT_SAMPLING_RATE,
-        audio_encoding=DEFAULT_AUDIO_ENCODING,
-        chunk_size=DEFAULT_CHUNK_SIZE,
-        endpointing_config=PunctuationEndpointingConfig(),
+    # transcriber_config = AzureTranscriberConfig(
+    #     sampling_rate=DEFAULT_SAMPLING_RATE,
+    #     audio_encoding=DEFAULT_AUDIO_ENCODING,
+    #     chunk_size=DEFAULT_CHUNK_SIZE,
+    #     endpointing_config=PunctuationEndpointingConfig(),
+    #     language="pt-BR",
+    # )
+    transcriber_config = DeepgramTranscriberConfig.from_telephone_input_device(
         language="pt-BR",
+        model="nova-2",
     )
+
     twilio_config = TwilioConfig(
         account_sid=os.environ["TWILIO_ACCOUNT_SID"],
         auth_token=os.environ["TWILIO_AUTH_TOKEN"],
@@ -104,9 +99,10 @@ def call_phone_number(input: str) -> str:
         config_manager=RedisConfigManager(),
         agent_config=ChatGPTAgentConfig(
             prompt_preamble=prompt_preamble,
-            # initial_message=BaseMessage(text=initial_message),
-            temperature=0.1,
-            allow_agent_to_be_cut_off=False,
+            initial_message=BaseMessage(text="Alô, boa tarde!"),
+            temperature=0.5,
+            # allow_agent_to_be_cut_off=False,
+            model_name="gpt-4-0125-preview",
         ),
         logger=logging.Logger("call_phone_number"),
         synthesizer_config=elevenlabs_synthesizer_config,

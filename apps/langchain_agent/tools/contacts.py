@@ -3,7 +3,7 @@ from langchain.agents import tool
 
 CONTACTS = [
     # {"name": "Clínica Girassol", "phone": "+5511973567307"},
-    {"name": "Dra. Monica Adoni Heller", "phone": "+551120991545"},
+    {"name": "Dermatologista", "phone": "+551130788848"},
     ]
 
 

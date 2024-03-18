@@ -25,7 +25,7 @@ if __name__ == "__main__":
     OBJECTIVE = "Ligue para as clínicas em meus contatos e pergunte qual o próximo horário disponível para consulta."
     llm = ChatOpenAI(
         temperature=0, 
-        model_name="gpt-4")
+        model_name="gpt-4-turbo-preview")
     system_message = """
         Você é o assistente pessoal do Sr.Mauricio.
         Seu trabalho é ajudar o Sr.Mauricio a agendar uma consulta com dermatologista.
